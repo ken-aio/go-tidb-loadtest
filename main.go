@@ -23,6 +23,7 @@ var (
 	reqNum      = flag.Int("n", 1000, "total request num")
 	parallelNum = flag.Int("t", 20, "parallel number")
 	debug       = flag.Bool("debug", false, "true if debug mode")
+	insOnly     = flag.Bool("ins", false, "true if only insert")
 )
 
 var db map[string]*sql.DB
@@ -64,9 +65,11 @@ func load(sema chan int, wg *sync.WaitGroup, host string) {
 	sema <- 1
 	defer func() { <-sema }()
 	code := insert(host, "")
-	update(host, code)
-	deleteOne(host, code)
-	insert(host, code)
+	if !*insOnly {
+		update(host, code)
+		deleteOne(host, code)
+		insert(host, code)
+	}
 }
 
 func initDB(dbHost string) {
